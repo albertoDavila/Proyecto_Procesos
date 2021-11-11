@@ -71,31 +71,48 @@ class MainFrame(Frame):
             print(self.theta[i, :self.iter + 1])
         canvas.draw()
 
+    def pausar(self):
+        self.pausa=True
 
+    def continuar(self):
+        self.pausa = False
+        self.iteracion_Recursivo()
 
     def iteracion_Recursivo(self):
-        self.iter = self.iter + 1
-        self.chi = []
-        self.N = self.N + 1
-        for i, value in enumerate(self.coef):
-            if i < len(self.coeficientes_a):
-                self.chi.append(self.YN[self.N - (value + 1)])
+        if(self.pausa==False):
+            self.iter = self.iter + 1
+            self.chi = []
+            self.N = self.N + 1
+            for i, value in enumerate(self.coef):
+                if i < len(self.coeficientes_a):
+                    self.chi.append(self.YN[self.N - (value + 1)])
 
-            else:
-                self.chi.append(self.UN[self.N - (value + 2)])
+                else:
+                    self.chi.append(self.UN[self.N - (value + 2)])
 
-        self.chi = np.matrix(self.chi).T
-        self.beta = self.chi.T @ self.P @ self.chi
-        self.P = self.P - (self.P @ self.chi * self.chi.T @ self.P) / (1 + self.beta)
-        self.t_max = self.t_max - self.P @ self.chi @ (self.chi.T @ self.t_max - self.YN[self.N - 1])
-        self.theta[:, self.iter] = self.t_max.ravel()
-        self.txtRes.delete(0, 'end')
-        self.txtRes.insert(0, self.t_max.ravel())
-        self.plot()
+            self.chi = np.matrix(self.chi).T
+            self.beta = self.chi.T @ self.P @ self.chi
+            self.P = self.P - (self.P @ self.chi * self.chi.T @ self.P) / (1 + self.beta)
+            self.t_max = self.t_max - self.P @ self.chi @ (self.chi.T @ self.t_max - self.YN[self.N - 1])
+            self.theta[:, self.iter] = self.t_max.ravel()
+
+            #self.error = self.YN[self.N - 1] - self.chi[self.N - 1] @ self.theta
+            self.txtRes.delete(0, 'end')
+            self.txtRes.insert(0, self.t_max.ravel())
+
+            self.txtIter.delete(0, 'end')
+            self.txtIter.insert(0, self.iter)
+            self.plot()
+
+            self.txtError.delete(0, 'end')
+            self.txtError.insert(0, self.error)
+
+            root.after(1000, self.iteracion_Recursivo)
 
 
 
     def minimos_cuadrados_recursivo(self):
+        self.pausa = False
         self.iter=0
         self.N = int(self.txtN.get())
         self.entradas_a = (self.txtn.get().split(" "))
@@ -127,13 +144,26 @@ class MainFrame(Frame):
         #self.coeficientes_a, self.coeficientes_b = zip(*sorted(zip(self.coeficientes_a, self.coeficientes_b)))
         self.coef = self.coeficientes_a + self.coeficientes_b
 
+        self.error = self.YN[self.N - 1] - self.psi[self.N - 1] @ self.theta
+
         self.txtRes.delete(0, 'end')
         self.txtRes.insert(0, self.t_max.ravel())
 
+        self.txtIter.delete(0, 'end')
+        self.txtIter.insert(0, self.iter)
+
+        self.txtError.delete(0, 'end')
+        self.txtError.insert(0, self.error)
 
 
-        self.btnIteracion = Button(self, text="Iterar", command=self.iteracion_Recursivo)
-        self.btnIteracion.place(x=150, y=400)
+
+        self.btnIteracion = Button(self, text="Continuar", command=self.continuar)
+        self.btnIteracion.place(x=100, y=430)
+        self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
+        self.btnIteracion.place(x=250, y=430)
+
+        if (self.pausa == False):
+            self.iteracion_Recursivo()
 
 
 
@@ -176,6 +206,11 @@ class MainFrame(Frame):
         self.txtError.insert(0, self.error)
 
     def recursivo_widgets(self):
+        for child in self.winfo_children():
+            child.destroy()
+
+        self.create_widgets()
+
         self.btnArchivo = Button(self, text="Subir archivo", command = self.LeerArchivo)
         self.btnArchivo.place(x=150, y=180)
         Label(self, text="Cargar Archivo:").place(x=30, y=180)
@@ -195,15 +230,24 @@ class MainFrame(Frame):
         self.btnEmpezar = Button(self, text="Empezar", command=self.minimos_cuadrados_recursivo)
         self.btnEmpezar.place(x=150, y=310)
 
-        Label(self, text="Resultado").place(x=30, y=340)
-        self.txtRes = Entry(self, width=30)
-        self.txtRes.place(x=100, y=340)
+        Label(self, text="Iteración actual").place(x=30, y=340)
+        self.txtIter = Entry(self, width=5)
+        self.txtIter.place(x=130, y=340)
 
-        Label(self, text="Error").place(x=30, y=370)
+        Label(self, text="Resultado").place(x=30, y=370)
+        self.txtRes = Entry(self, width=40)
+        self.txtRes.place(x=100, y=370)
+
+        Label(self, text="Error").place(x=30, y=400)
         self.txtError = Entry(self, width=20)
-        self.txtError.place(x=100, y=370)
+        self.txtError.place(x=100, y=400)
 
     def batch_widgets(self):
+        for child in self.winfo_children():
+            child.destroy()
+
+        self.create_widgets()
+
         self.btnArchivo = Button(self, text="Subir archivo", command = self.LeerArchivo)
         self.btnArchivo.place(x=150, y=180)
         Label(self, text="Cargar Archivo:").place(x=30, y=180)
@@ -254,8 +298,10 @@ class MainFrame(Frame):
 
 
 root = Tk()
-#root.geometry("800x700")
+root.title('Proyecto Procesos de Control')
+root.geometry("800x700")
 app = MainFrame(master=root)
+
 app.mainloop()
 
 
