@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 
 
-METODOS=['Elija una opcion','Minimos cuadrados', 'otros']
+METODOS=['Elija una opcion','Minimos cuadrados', 'Minimo cuadrado ponderado']
 FORMAS=['Elija una opción','Lote', 'Recursivo']
 
 
@@ -36,6 +36,8 @@ class MainFrame(Frame):
             self.batch_widgets()
         elif (self.cmbMetodos.get() == METODOS[1]) & (self.cmbFormas.get()== FORMAS[2]):
             self.recursivo_widgets()
+        elif (self.cmbMetodos.get() == METODOS[2]) & (self.cmbFormas.get()== FORMAS[1]):
+            self.batch_ponderado_widgets()
             #messagebox.showinfo(title="Entro la funcion", message=" Valio madre")
 
 
@@ -62,14 +64,14 @@ class MainFrame(Frame):
         ax.set_xlabel('Iteraciones')
         ax.set_ylabel('Coeficientes')
         x = []
-
         for i in range(self.iter + 1):
             x.append(i)
         for i in range(len(self.coeficientes_a) + len(self.coeficientes_b)):
             ax.plot(x, self.theta[i, :self.iter + 1], label= self.entradas[i])
             ax.legend(loc='upper right', frameon=False)
-            print(self.theta[i, :self.iter + 1])
         canvas.draw()
+
+
 
     def pausar(self):
         self.pausa=True
@@ -136,7 +138,7 @@ class MainFrame(Frame):
             self.psi[value :, count + len(self.coeficientes_a)] = self.UN[0:self.N - value]
 
         self.P = np.linalg.inv(self.psi.T @ self.psi)
-        self.theta = np.zeros((len(self.coeficientes_a) + len(self.coeficientes_b), 50))
+        self.theta = np.zeros((len(self.coeficientes_a) + len(self.coeficientes_b), 1000))
         self.t = np.matrix((self.P @ self.psi.T @ self.YN[0:self.N]))
 
         self.t_max = self.t.reshape((self.t.size, 1))
@@ -195,6 +197,9 @@ class MainFrame(Frame):
 
         self.theta=np.linalg.inv(self.phi.T@self.phi)@self.phi.T@self.YN[:self.N]
         self.error = self.YN[self.N-1] - self.phi[self.N-1] @ self.theta
+        print(self.theta)
+
+        self.plot()
 
         # messagebox.showinfo(title="Entro la funcion", message=str(theta))
         # result = int(self.txtRes.get())
@@ -205,11 +210,101 @@ class MainFrame(Frame):
         self.txtError.delete(0, 'end')
         self.txtError.insert(0, self.error)
 
+
+
+    def minimos_cuadrados_batch_ponderado(self):
+        self.N = int(self.txtN.get())
+        self.gamma= float(self.txtGamma.get())
+        self.wf=float(self.txtwf.get())
+        self.entradas_a = (self.txtn.get().split(" "))
+        self.coeficientes_a = list(map(lambda x: x[1], self.entradas_a))
+        self.coeficientes_a = list(map(int, self.coeficientes_a))
+
+        self.entradas_b = (self.txtm.get().split(" "))
+        self.coeficientes_b = list(map(lambda x: x[1], self.entradas_b))
+        self.coeficientes_b = list(map(int, self.coeficientes_b))
+
+        self.phi=np.zeros((self.N,len(self.coeficientes_a)+len(self.coeficientes_b)))
+
+        self.YN = self.f[0]
+        self.UN = self.f[1]
+        self.WN=np.zeros((self.N,self.N), float)
+
+        for i in range(self.N):
+            self.WN[i, i] = self.wf * (self.gamma ** (self.N - i - 1))
+
+        for count, value in enumerate(self.coeficientes_a):
+            self.phi[value:, count] = self.YN[0:self.N - value]
+
+        for count, value in enumerate(self.coeficientes_b):
+            self.phi[value :, count + len(self.coeficientes_a)] = self.UN[0:self.N - value]
+
+        self.theta=np.linalg.inv(self.phi.T@self.WN@self.phi)@self.phi.T@self.WN@self.YN[:self.N]
+
+        self.error = self.YN[self.N-1] - self.phi[self.N-1] @ self.theta
+        print(self.theta)
+
+
+
+        # messagebox.showinfo(title="Entro la funcion", message=str(theta))
+        # result = int(self.txtRes.get())
+
+        self.txtRes.delete(0, 'end')
+        self.txtRes.insert(0, self.theta)
+
+        self.txtError.delete(0, 'end')
+        self.txtError.insert(0, self.error)
+
+    def batch_ponderado_widgets(self):
+        for child in self.winfo_children():
+            child.destroy()
+
+        self.create_widgets()
+
+        self.btnArchivo = Button(self, text="Subir archivo", command = self.LeerArchivo)
+        self.btnArchivo.place(x=150, y=180)
+        Label(self, text="Cargar Archivo:").place(x=30, y=180)
+
+        Label(self, text="Cantidad de datos (N):").place(x=30, y=220)
+        self.txtN = Entry(self, width=15)
+        self.txtN.place(x=300, y=220)
+
+        Label(self, text="Valor del ratio de atenuación (Ɣ):").place(x=30, y=250)
+        self.txtGamma = Entry(self, width=15)
+        self.txtGamma.place(x=300, y=250)
+
+        Label(self, text="Valor del factor de atenuación (a):").place(x=30, y=280)
+        self.txtwf = Entry(self, width=15)
+        self.txtwf.place(x=300, y=280)
+
+        Label(self, text="Escribe las variables as (empezando por a1)").place(x=30, y=310)
+        self.txtn = Entry(self, width=15)
+        self.txtn.place(x=300, y=310)
+
+        Label(self, text="Escribe las variables as (empezando por b0)").place(x=30, y=340)
+        self.txtm = Entry(self, width=15)
+        self.txtm.place(x=300, y=340)
+
+        self.btnEmpezar = Button(self, text="Empezar", command=self.minimos_cuadrados_batch_ponderado)
+        self.btnEmpezar.place(x=150, y=370)
+
+        Label(self, text="Resultado").place(x=30, y=400)
+        self.txtRes = Entry(self, width=30)
+        self.txtRes.place(x=100, y=400)
+
+        Label(self, text="Error").place(x=30, y=430)
+        self.txtError = Entry(self, width=20)
+        self.txtError.place(x=100, y=430)
+
+
+
+
     def recursivo_widgets(self):
         for child in self.winfo_children():
             child.destroy()
 
         self.create_widgets()
+        self.cmbFormas.set(FORMAS[2])
 
         self.btnArchivo = Button(self, text="Subir archivo", command = self.LeerArchivo)
         self.btnArchivo.place(x=150, y=180)
