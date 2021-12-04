@@ -147,7 +147,8 @@ class MainFrame(Frame):
             if abs(self.error)< abs(next(iter(self.best_error.values()))):
                 self.best_error={self.N_estatica +self.iter: self.error}
 
-
+            print('Metodos ', self.cmbMetodos.get())
+            print('Formas ', self.cmbFormas.get())
 
 
             self.txtRes.delete(0, 'end')
@@ -555,7 +556,8 @@ class MainFrame(Frame):
             if abs(self.error)< abs(next(iter(self.best_error.values()))):
                 self.best_error={self.N_estatica +self.iter: self.error}
 
-
+            print('Metodos ', self.cmbMetodos.get() )
+            print('Formas ',self.cmbFormas.get())
 
 
             self.txtRes.delete(0, 'end')
@@ -812,6 +814,10 @@ class MainFrame(Frame):
 
             self.txtMod.delete(0, 'end')
             self.txtMod.insert(0, self.moderation)
+            #print('referencia utilizada ', self.ref)
+
+
+            #print('Diferencia entre # Neutros', self.Num_neutrons_list[-2] - self.Num_neutrons_list[-1])
 
             if(self.ref>=1000):
                 messagebox.showinfo(title="Advertencia de seguridad", message='No se puede reducir la referenica a este valor')
