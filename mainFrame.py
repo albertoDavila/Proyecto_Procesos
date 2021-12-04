@@ -55,37 +55,40 @@ class MainFrame(Frame):
         self.f = pd.read_csv(file, sep ="\t", header=None)
 
     def plot(self):
-
-        fig=Figure(figsize=(5,4), dpi=100)
         if(self.Proyecto_Elegido=='Minimos Cuadrados'):
+            fig = Figure(figsize=(5, 4), dpi=100)
             ax = fig.add_subplot(111)
             canvas_wid = FigureCanvasTkAgg(fig, master=root)
             canvas_wid.get_tk_widget().grid(row=0,column=1)
             canvas_wid.draw()
             self.redraw(canvas_wid,ax)
         elif(self.Proyecto_Elegido=='Planta'):
+            fig = Figure(figsize=(5, 8), dpi=100)
             ax = fig.add_subplot(311)
             ax2 = fig.add_subplot(312)
             ax3 = fig.add_subplot(313)
             canvas_wid = FigureCanvasTkAgg(fig, master=root)
             canvas_wid.get_tk_widget().grid(row=0, column=1)
             canvas_wid.draw()
-            self.redraw_radioactivo(canvas_wid, ax)
+            self.redraw_radioactivo(canvas_wid, ax, ax2, ax3)
 
     def redraw_radioactivo(self, canvas,ax,ax2, ax3):
         ax.clear()
         #ax.set_xlabel('Tiempo')
         ax.set_ylabel('Valor')
-        ax.plot(self.ck)
-        ax.plot(self.rk)
-        ax.legend(['c(k)', 'r(k)'])
+        ax.plot(self.xenon_list)
+        ax.legend(['Xenon'])
 
         ax2.clear()
-        ax2.set_xlabel('Tiempo')
         ax2.set_ylabel('Valor')
-        ax2.plot(self.mk)
-        ax2.plot(self.pk)
-        ax2.legend(['m(k)', 'p(k)'])
+        ax2.plot(self.lodine_list)
+        ax2.legend(['Iodine'])
+
+        ax3.clear()
+        ax3.set_xlabel('Tiempo')
+        ax3.set_ylabel('Valor')
+        ax3.plot(self.Num_neutrons_graph_list)
+        ax3.legend(['# Neutrons'])
         canvas.draw()
 
 
@@ -106,6 +109,8 @@ class MainFrame(Frame):
 
     def pausar(self):
         self.pausa=True
+        #if (self.Proyecto_Elegido=='Planta'):
+         #   self.Primera=False
 
     def continuar(self):
         self.pausa = False
@@ -139,7 +144,7 @@ class MainFrame(Frame):
 
             if abs(self.error)< abs(next(iter(self.best_error.values()))):
                 self.best_error={self.N_estatica +self.iter: self.error}
-                print(next(iter(self.best_error.values())))
+
 
 
 
@@ -162,6 +167,7 @@ class MainFrame(Frame):
             self.txtBest_error.insert(0, next(iter(self.best_error.values())))
 
             root.after(1000, self.iteracion_Recursivo)
+
 
 
     def minimos_cuadrados_recursivo(self):
@@ -329,23 +335,23 @@ class MainFrame(Frame):
 
         Label(self, text="Cantidad de datos (N):").place(x=30, y=220)
         self.txtN = Entry(self, width=15)
-        self.txtN.place(x=305, y=220)
+        self.txtN.place(x=370, y=220)
 
         Label(self, text="Valor del ratio de atenuación (Ɣ):").place(x=30, y=250)
         self.txtGamma = Entry(self, width=15)
-        self.txtGamma.place(x=300, y=250)
+        self.txtGamma.place(x=370, y=250)
 
-        Label(self, text="Valor del factor de atenuación (a):").place(x=30, y=280)
+        Label(self, text="Valor del factor de ponderación (a):").place(x=30, y=280)
         self.txtwf = Entry(self, width=15)
-        self.txtwf.place(x=300, y=280)
+        self.txtwf.place(x=370, y=280)
 
-        Label(self, text="Escribe las variables as (empezando por a1)").place(x=30, y=310)
+        Label(self, text="Variables a's (empezar por a1 y separar con espacios)").place(x=30, y=310)
         self.txtn = Entry(self, width=15)
-        self.txtn.place(x=305, y=310)
+        self.txtn.place(x=370, y=310)
 
-        Label(self, text="Escribe las variables as (empezando por b0)").place(x=30, y=340)
+        Label(self, text="Variables b's (empezar por b0 y separar con espacios)").place(x=30, y=340)
         self.txtm = Entry(self, width=15)
-        self.txtm.place(x=305, y=340)
+        self.txtm.place(x=370, y=340)
 
         self.btnEmpezar = Button(self, text="Empezar", command=self.minimos_cuadrados_batch_ponderado)
         self.btnEmpezar.place(x=150, y=370)
@@ -377,15 +383,15 @@ class MainFrame(Frame):
 
         Label(self, text="Cantidad de datos inciales (N):").place(x=30, y=220)
         self.txtN = Entry(self, width=15)
-        self.txtN.place(x=305, y=220)
+        self.txtN.place(x=370, y=220)
 
-        Label(self, text="Escribe las variables a's (empezando por a1)").place(x=30, y=250)
+        Label(self, text="Variables a's (empezar por a1 y separar con espacios)").place(x=30, y=250)
         self.txtn = Entry(self, width=15)
-        self.txtn.place(x=300, y=250)
+        self.txtn.place(x=370, y=250)
 
-        Label(self, text="Escribe las variables b's (empezando por b0)").place(x=30, y=280)
+        Label(self, text="Variables b's (empezar por b0 y separar con espacios)").place(x=30, y=280)
         self.txtm = Entry(self, width=15)
-        self.txtm.place(x=300, y=280)
+        self.txtm.place(x=370, y=280)
 
         self.btnEmpezar = Button(self, text="Empezar", command=self.minimos_cuadrados_recursivo)
         self.btnEmpezar.place(x=150, y=310)
@@ -424,15 +430,15 @@ class MainFrame(Frame):
 
         Label(self, text="Cantidad de datos (N):").place(x=30, y=220)
         self.txtN = Entry(self, width=15)
-        self.txtN.place(x=305, y=220)
+        self.txtN.place(x=370, y=220)
 
-        Label(self, text="Escribe las variables a's (empezando por a1)").place(x=30, y=250)
+        Label(self, text="Variables a's (empezar por a1 y separar con espacios)").place(x=30, y=250)
         self.txtn = Entry(self, width=15)
-        self.txtn.place(x=305, y=250)
+        self.txtn.place(x=370, y=250)
 
-        Label(self, text="Escribe las variables b's (empezando por b0)").place(x=30, y=280)
+        Label(self, text="Variables b's (empezar por b0 y separar con espacios)").place(x=30, y=280)
         self.txtm = Entry(self, width=15)
-        self.txtm.place(x=305, y=280)
+        self.txtm.place(x=370, y=280)
 
         self.btnEmpezar = Button(self, text="Empezar", command=self.minimos_cuadrados_batch)
         self.btnEmpezar.place(x=150, y=310)
@@ -507,7 +513,8 @@ class MainFrame(Frame):
         self.txtBest_error.insert(0, next(iter(self.best_error.values())))
 
         self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
-        self.btnIteracion.place(x=250, y=490)
+        self.btnIteracion.place(x=250, y=370)
+
 
         if (self.pausa == False):
             self.iteracion_Recursivo_ponderado()
@@ -541,7 +548,7 @@ class MainFrame(Frame):
 
             if abs(self.error)< abs(next(iter(self.best_error.values()))):
                 self.best_error={self.N_estatica +self.iter: self.error}
-                print(next(iter(self.best_error.values())))
+
 
             self.txtRes.delete(0, 'end')
             self.txtRes.insert(0, self.t_max.ravel())
@@ -576,22 +583,22 @@ class MainFrame(Frame):
         Label(self, text="Cargar Archivo:").place(x=30, y=180)
         Label(self, text="Cantidad de datos (N):").place(x=30, y=220)
         self.txtN = Entry(self, width=15)
-        self.txtN.place(x=305, y=220)
+        self.txtN.place(x=370, y=220)
         Label(self, text="Valor del ratio de atenuación (Ɣ):").place(x=30, y=250)
         self.txtGamma = Entry(self, width=15)
-        self.txtGamma.place(x=300, y=250)
+        self.txtGamma.place(x=370, y=250)
 
-        Label(self, text="Valor del factor de atenuación (a):").place(x=30, y=280)
+        Label(self, text="Valor del factor de ponderación (a):").place(x=30, y=280)
         self.txtwf = Entry(self, width=15)
-        self.txtwf.place(x=300, y=280)
+        self.txtwf.place(x=370, y=280)
 
-        Label(self, text="Escribe las variables as (empezando por a1)").place(x=30, y=310)
+        Label(self, text="Variables a's (empezar por a1 y separar con espacios)").place(x=30, y=310)
         self.txtn = Entry(self, width=15)
-        self.txtn.place(x=305, y=310)
+        self.txtn.place(x=370, y=310)
 
-        Label(self, text="Escribe las variables as (empezando por b0)").place(x=30, y=340)
+        Label(self, text="Variables b's (empezar por b0 y separar con espacios)").place(x=30, y=340)
         self.txtm = Entry(self, width=15)
-        self.txtm.place(x=305, y=340)
+        self.txtm.place(x=370, y=340)
 
         self.btnEmpezar = Button(self, text="Empezar", command=self.minimos_cuadrados_recursivo_ponderado)
         self.btnEmpezar.place(x=150, y=370)
@@ -616,6 +623,9 @@ class MainFrame(Frame):
         Label(self, text="Error: ").place(x=230, y=510)
         self.txtBest_error = Entry(self, width=15)
         self.txtBest_error.place(x=300, y=510)
+
+
+
 
     def create_widgets(self):
 
@@ -660,29 +670,36 @@ class MainFrame(Frame):
         self.pantalla_inicio()
         self.Proyecto_Elegido = 'Planta'
 
+
         Label(self, text="Valor de Referencia :").place(x=30, y=180)
         self.txtRef = Entry(self, width=15)
         self.txtRef.place(x=300, y=180)
 
         Label(self, text="Neutrons").place(x=30, y=220)
-        self.txtRes = Entry(self, width=30, state="readonly")
-        self.txtRes.place(x=100, y=220)
+        self.txtNeu = Entry(self, width=30)
+        self.txtNeu.place(x=100, y=220)
 
-        Label(self, text="Lodine").place(x=30, y=250)
-        self.txtRes = Entry(self, width=30,  state="readonly")
-        self.txtRes.place(x=100, y=250)
+        Label(self, text="Iodine").place(x=30, y=250)
+        self.txtLod = Entry(self, width=30)
+        self.txtLod.place(x=100, y=250)
 
         Label(self, text="Xenon").place(x=30, y=280)
-        self.txtRes = Entry(self, width=30,  state="readonly")
-        self.txtRes.place(x=100, y=280)
+        self.txtXen = Entry(self, width=30)
+        self.txtXen.place(x=100, y=280)
 
         Label(self, text="Moderation").place(x=30, y=310)
-        self.txtRes = Entry(self, width=30,  state="readonly")
-        self.txtRes.place(x=100, y=310)
+        self.txtMod = Entry(self, width=30)
+        self.txtMod.place(x=100, y=310)
 
 
         self.btnEmpezar = Button(self, text="Empezar", command=self.Planta_simulacion)
         self.btnEmpezar.place(x=150, y=340)
+
+        self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
+        self.btnIteracion.place(x=250, y=340)
+
+        self.btnEmpezar = Button(self, text="Continuar", command=self.Continuar)
+        self.btnEmpezar.place(x=350, y=340)
 
         self.lodine = 0
         self.xenon = 0
@@ -691,37 +708,116 @@ class MainFrame(Frame):
         self.kp = .01
         self.ki = .001
         self.moderation = 0
+        self.var_loop_list=[]
+        self.lodine_list=[]
+        self.xenon_list=[]
+        self.Num_neutrons_list=[]
+        self.Num_neutrons_graph_list=[]
+        self.Num_neutrons_list.append(self.Num_neutrons)
+        self.Num_neutrons_graph_list.append(self.Num_neutrons)
+        self.pausa = False
+
+    def Continuar(self):
+
+        self.pausa=False
+        self.Planta_simulacion()
+
 
     def Planta_simulacion(self):
-        self.ref = float(self.txtRef.get())
-        self.a = (self.ref - self.Num_neutrons)
-        self.b = self.var_arr + self.a
-        self.c = self.a * self.kp + self.b * self.ki
 
-        if ((self.c > 0) & (self.c < .60)):
-            self.moderation = self.c
-        elif (self.c > .60):
-            self.c = .60
-            self.moderation = self.c
-        elif (self.c < 0):
-            self.c = 0
-            self.moderation = self.c
 
-        self.d = (self.Num_neutrons + 1) * self.c
-        self.e = (self.c - 1) * (self.Num_neutrons + 1) - (self.Num_neutrons + 1)
-        self.f = self.d * 3
-        self.h = self.e + self.f
+        if (self.pausa == False):
 
-        self.g = (self.lodine * (.995)) + (self.f * .11)
 
-        self.i = (((-.995 + 1) * (self.lodine)) * .5) + (self.xenon * .999)
+            self.lodine_list.append(self.lodine)
+            self.xenon_list.append(self.xenon)
 
-        self.j = (1 / ((1 / self.i) + (1 / self.h))) * -1
+            self.var_loop_list.append(self.var_arr)
 
-        self.Num_neutrons = self.j + self.h
-        self.lodine = self.g
-        self.xenon = self.j + self.i
-        self.plot()
+            self.lodine = np.float64(self.lodine_list[-1])
+            self.xenon = np.float64(self.xenon_list[-1])
+            self.Num_neutrons = np.float64(self.Num_neutrons_list[-1])
+            self.var_arr=np.float64(self.var_loop_list[-1])
+
+            self.ref = np.float64(self.txtRef.get())
+            self.a = (self.ref - self.Num_neutrons)
+            self.b = self.var_arr + self.a
+
+            self.var_arr=self.b
+
+            self.c = (self.a * self.kp) + (self.b * self.ki)
+
+
+
+            if ((self.c > 0) & (self.c <= .60)):
+                self.moderation = self.c
+            elif (self.c > .60):
+                self.c = .60
+                self.moderation = self.c
+            elif (self.c < 0):
+                self.c = 0
+                self.moderation = self.c
+
+
+
+
+            self.d = (self.Num_neutrons + 1) * self.c
+            self.e = ((1- self.c) * (self.Num_neutrons + 1)) - (self.Num_neutrons + 1)
+            self.f = self.d * 3
+            self.h = self.e + self.f
+
+            self.Num_neutrons = self.h
+            self.Num_neutrons_graph_list.append(self.Num_neutrons)
+
+            if(self.Num_neutrons>= 1000):
+                messagebox.showinfo(title="Advertencia de seguridad",
+                                    message='El reactor se apagó por rebasar el limite de referencia')
+                self.Planta_widgets()
+
+
+
+            self.g = (self.lodine * (.995)) + (self.f * .11)
+            self.m = self.lodine * (1-.995)
+            self.i = (self.m * .5) + (self.xenon * .999)
+
+
+            self.n = (1 / self.i) + (1 / self.h)
+
+            self.j=-(1/self.n)
+
+
+
+
+            self.Num_neutrons= self.h + self.j
+            self.Num_neutrons_list.append(self.Num_neutrons)
+            self.lodine = self.g
+
+            self.xenon = self.j + self.i
+
+            self.plot()
+
+            self.txtNeu.delete(0, 'end')
+            self.txtNeu.insert(0, self.Num_neutrons_graph_list[-1])
+
+            self.txtLod.delete(0, 'end')
+            self.txtLod.insert(0, self.lodine_list[-1])
+
+            self.txtXen.delete(0, 'end')
+            self.txtXen.insert(0, self.xenon_list[-1])
+
+            self.txtMod.delete(0, 'end')
+            self.txtMod.insert(0, self.moderation)
+            #print('referencia utilizada ', self.ref)
+
+
+            #print('Diferencia entre # Neutros', self.Num_neutrons_list[-2] - self.Num_neutrons_list[-1])
+
+            if(self.ref>=1000):
+                messagebox.showinfo(title="Advertencia de seguridad", message='No se puede reducir la referenica a este valor')
+                self.Planta_widgets()
+
+
+            root.after(1000, self.Planta_simulacion)
 
 
 
