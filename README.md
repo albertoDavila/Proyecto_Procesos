@@ -8,7 +8,7 @@ pip install matplotlib tk pandas numpy
 O si se utiliza un ambiente de anaconda se pueden instalar desde su navegador o utilizando los siguientes comandos
 
 ```
-pip install matplotlib tk pandas numpy
+conda install matplotlib tk pandas numpy
 ```
 ## Descarga
 Para obtener los archivos para correr el programa se puede usar el siguiente comando
