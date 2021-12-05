@@ -4,12 +4,10 @@
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
 from tkinter import Label, Button, Entry, Frame, Tk, messagebox, filedialog
-import tkinter as tk
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,NavigationToolbar2Tk)
-# from libFracMix import FracMix
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 from tkinter.ttk import Combobox
 import pandas as pd
 import numpy as np
@@ -114,10 +112,14 @@ class MainFrame(Frame):
 
     def continuar(self):
         self.pausa = False
-        if (self.cmbMetodos.get() == METODOS[1]) & (self.cmbFormas.get() == FORMAS[2]):
-            self.minimos_cuadrados_recursivo()
-        elif (self.cmbMetodos.get() == METODOS[2]) & (self.cmbFormas.get() == FORMAS[2]):
-            self.minimos_cuadrados_recursivo_ponderado()
+        if (self.Proyecto_Elegido == 'Minimos Cuadrados'):
+            if (self.cmbMetodos.get() == METODOS[1]) & (self.cmbFormas.get() == FORMAS[2]):
+                self.iteracion_Recursivo()
+            elif (self.cmbMetodos.get() == METODOS[2]) & (self.cmbFormas.get() == FORMAS[2]):
+                self.iteracion_Recursivo_ponderado()
+        elif (self.Proyecto_Elegido == 'Planta'):
+            self.Planta_simulacion()
+
 
     def iteracion_Recursivo(self):
         if(self.pausa==False):
@@ -144,8 +146,6 @@ class MainFrame(Frame):
 
             if abs(self.error)< abs(next(iter(self.best_error.values()))):
                 self.best_error={self.N_estatica +self.iter: self.error}
-
-
 
 
 
@@ -231,6 +231,9 @@ class MainFrame(Frame):
 
         self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
         self.btnIteracion.place(x=250, y=310)
+
+        self.btnEmpezar = Button(self, text="Continuar", command=self.continuar)
+        self.btnEmpezar.place(x=350, y=310)
 
         if (self.pausa == False):
             self.iteracion_Recursivo()
@@ -515,6 +518,9 @@ class MainFrame(Frame):
         self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
         self.btnIteracion.place(x=250, y=370)
 
+        self.btnEmpezar = Button(self, text="Continuar", command=self.continuar)
+        self.btnEmpezar.place(x=350, y=370)
+
 
         if (self.pausa == False):
             self.iteracion_Recursivo_ponderado()
@@ -548,6 +554,8 @@ class MainFrame(Frame):
 
             if abs(self.error)< abs(next(iter(self.best_error.values()))):
                 self.best_error={self.N_estatica +self.iter: self.error}
+
+
 
 
             self.txtRes.delete(0, 'end')
@@ -698,7 +706,7 @@ class MainFrame(Frame):
         self.btnIteracion = Button(self, text="Pausar", command=self.pausar)
         self.btnIteracion.place(x=250, y=340)
 
-        self.btnEmpezar = Button(self, text="Continuar", command=self.Continuar)
+        self.btnEmpezar = Button(self, text="Continuar", command=self.continuar)
         self.btnEmpezar.place(x=350, y=340)
 
         self.lodine = 0
@@ -717,10 +725,7 @@ class MainFrame(Frame):
         self.Num_neutrons_graph_list.append(self.Num_neutrons)
         self.pausa = False
 
-    def Continuar(self):
 
-        self.pausa=False
-        self.Planta_simulacion()
 
 
     def Planta_simulacion(self):
@@ -807,10 +812,6 @@ class MainFrame(Frame):
 
             self.txtMod.delete(0, 'end')
             self.txtMod.insert(0, self.moderation)
-            #print('referencia utilizada ', self.ref)
-
-
-            #print('Diferencia entre # Neutros', self.Num_neutrons_list[-2] - self.Num_neutrons_list[-1])
 
             if(self.ref>=1000):
                 messagebox.showinfo(title="Advertencia de seguridad", message='No se puede reducir la referenica a este valor')
